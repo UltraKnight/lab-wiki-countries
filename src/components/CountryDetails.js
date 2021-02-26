@@ -9,18 +9,23 @@ export default class CountryDetails extends React.Component {
         capital: '',
         area: 0,
         borders: [],
-        countryCode: ''
+        countryCode: '',
+        loading: true
     }
 
     updateCountry = async () => {
         try {
+            this.setState({
+                loading: true
+            })
+
             const countryCode = this.props.match.params.id;
             const response = await axios.get('https://restcountries.eu/rest/v2/all');
             const countries = response.data;
             const foundCountry = countries.find(country => country.alpha3Code === countryCode);
             const borders = foundCountry.borders.map(border => {
-                    return countries.find(country => country.alpha3Code === border);
-                })
+                return countries.find(country => country.alpha3Code === border);
+            })
 
             this.setState({
                 countryName: foundCountry.name,
@@ -28,6 +33,7 @@ export default class CountryDetails extends React.Component {
                 area: foundCountry.area,
                 borders: borders,
                 countryCode: foundCountry.alpha3Code,
+                loading: false
             })
         } catch (error) {
             console.log(error);
@@ -40,15 +46,16 @@ export default class CountryDetails extends React.Component {
 
     componentDidUpdate() {
         const countryCodeFromProp = this.props.match.params.id;
-        const {countryCode} = this.state;
-        if(countryCodeFromProp !== countryCode) {
+        const {countryCode, loading} = this.state;
+        if(countryCodeFromProp !== countryCode && ! loading) {
             this.updateCountry();
         }
     }
 
     render() {
-        const {countryName, capital, area, borders} = this.state;
-        return(
+        const {countryName, capital, area, borders, loading} = this.state;
+
+        return !loading ? (
             <div className="col-7 d-inline-block">
                 <h1>{countryName}</h1>
                 <table className="table">
@@ -87,5 +94,6 @@ export default class CountryDetails extends React.Component {
                 </table>
             </div>
         )
+        : <div></div>
     }
 }
