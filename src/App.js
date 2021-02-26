@@ -3,7 +3,8 @@ import React, { Component } from 'react';
 import NavBar from './components/NavBar';
 import CountriesList from './components/CountriesList';
 import CountryDetails from './components/CountryDetails';
-import countries from './countries.json';
+// import countries from './countries.json';
+import axios from 'axios';
 
 import {Route} from 'react-router-dom';
 
@@ -12,15 +13,24 @@ export default class App extends Component {
     countries: []
   }
 
-  componentDidMount() {
-    this.setState({
-      countries: countries
-    })
+  async componentDidMount() {
+    try {
+      const response = await axios.get('https://restcountries.eu/rest/v2/all');
+      this.setState({
+        countries: response.data
+      })
+    } catch (error) {
+      console.log(error);
+    }
+    // this.setState({
+    //   countries: countries
+    // })
   }
   
   render() {
     const {countries} = this.state;
-    return (
+    return countries.length
+    ? (
       <div className="App">
         <NavBar />
         
@@ -31,6 +41,7 @@ export default class App extends Component {
           </div>
         </div>
       </div>
-    );
+    )
+    : <h1 className='text-center mt-5'>Loading...</h1>
   }
 }

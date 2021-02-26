@@ -1,6 +1,7 @@
 import React from 'react';
-import countries from '../countries.json';
-import {Link} from 'react-router-dom'
+// import countries from '../countries.json';
+import {Link} from 'react-router-dom';
+import axios from 'axios';
 
 export default class CountryDetails extends React.Component {
     state = {
@@ -11,32 +12,42 @@ export default class CountryDetails extends React.Component {
         countryCode: ''
     }
 
-    findCountry= () => {
-        const countryCode = this.props.match.params.id;
-        const foundCountry = countries.find(country => country.cca3 === countryCode)
-        this.setState({
-            countryName: foundCountry.name.common,
-            capital: foundCountry.capital[0],
-            area: foundCountry.area,
-            borders: foundCountry.borders,
-            countryCode: foundCountry.cca3
-        })
+    updateCountry = async () => {
+        try {
+            const countryCode = this.props.match.params.id;
+            const response = await axios.get('https://restcountries.eu/rest/v2/all');
+            const countries = response.data;
+            const foundCountry = countries.find(country => country.alpha3Code === countryCode);
+            const borders = foundCountry.borders.map(border => {
+                    return countries.find(country => country.alpha3Code === border);
+                })
+
+            this.setState({
+                countryName: foundCountry.name,
+                capital: foundCountry.capital,
+                area: foundCountry.area,
+                borders: borders,
+                countryCode: foundCountry.alpha3Code,
+            })
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     componentDidMount() {
-        this.findCountry();
+        this.updateCountry();
     }
 
     componentDidUpdate() {
         const countryCodeFromProp = this.props.match.params.id;
         const {countryCode} = this.state;
         if(countryCodeFromProp !== countryCode) {
-            this.findCountry();
+            this.updateCountry();
         }
     }
 
     render() {
-        const {countryName, capital, area, borders, countryCode} = this.state;
+        const {countryName, capital, area, borders} = this.state;
         return(
             <div className="col-7 d-inline-block">
                 <h1>{countryName}</h1>
@@ -61,11 +72,10 @@ export default class CountryDetails extends React.Component {
                                     {
                                         borders.map((border, i)=> {
                                         return (
-                                            <li>
-                                                <Link key={i} 
-                                                    to={`/countries/${border}`}>
-                                                    {countries.find(country => country.cca3 === border).name.common}
-                                                </Link>
+                                            <li key={i}>
+                                                <Link
+                                                    to={`/countries/${border.alpha3Code}`}
+                                                >{border.name}</Link>
                                             </li>
                                         )
                                         })

@@ -7,10 +7,10 @@ export default function CountriesList({countries}) {
             <div className="list-group">
                 {
                     countries.map((country, i)=> 
-                        <Link key={i} className='list-group-item list-group-item-action' to={`/countries/${country.cca3}`}>
-                            <img src={`https://www.countryflags.io/${country.cca2.toLowerCase()}/flat/32.png`} 
-                                alt={`Flag of ${country.name.common}`} className='mr-2' />
-                            {country.name.common}
+                        <Link key={i} className='list-group-item list-group-item-action' to={`/countries/${country.alpha3Code}`}>
+                            <img src={`https://www.countryflags.io/${country.alpha2Code.toLowerCase()}/flat/32.png`} 
+                                alt={`Flag of ${country.name}`} className='mr-2' />
+                            {country.name}
                         </Link>
                     )
                 }
