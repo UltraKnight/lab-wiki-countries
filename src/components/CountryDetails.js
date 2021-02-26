@@ -10,7 +10,7 @@ export default class CountryDetails extends React.Component {
         area: 0,
         borders: [],
         countryCode: '',
-        loading: true
+        loading: true,
     }
 
     updateCountry = async () => {
@@ -23,6 +23,15 @@ export default class CountryDetails extends React.Component {
             const response = await axios.get('https://restcountries.eu/rest/v2/all');
             const countries = response.data;
             const foundCountry = countries.find(country => country.alpha3Code === countryCode);
+
+            if(!foundCountry) {
+                this.setState({
+                    countryCode: countryCode,
+                    loading: false
+                })
+                return;
+            }
+
             const borders = foundCountry.borders.map(border => {
                 return countries.find(country => country.alpha3Code === border);
             })
@@ -36,6 +45,10 @@ export default class CountryDetails extends React.Component {
                 loading: false
             })
         } catch (error) {
+            this.setState({
+                error: true,
+                loading: false
+            })
             console.log(error);
         }
     }
@@ -54,8 +67,7 @@ export default class CountryDetails extends React.Component {
 
     render() {
         const {countryName, capital, area, borders, loading} = this.state;
-
-        return !loading ? (
+        return !loading && countryName ? (
             <div className="col-7 d-inline-block">
                 <h1>{countryName}</h1>
                 <table className="table">
